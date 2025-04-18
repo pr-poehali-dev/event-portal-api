@@ -187,6 +187,65 @@ export const createEvent = async (eventData: {
   return newEvent;
 };
 
+// PUT: Обновление существующего мероприятия (только для админа)
+export const updateEvent = async (
+  eventId: string,
+  eventData: {
+    title: string;
+    description: string;
+    imageUrl: string;
+    date: Date;
+    city: "Копейск" | "Челябинск";
+    category: string;
+  },
+  currentUser: User
+) => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  if (!currentUser.isAdmin) {
+    throw new Error("Только администраторы могут редактировать мероприятия");
+  }
+  
+  const eventIndex = events.findIndex(e => e.id === eventId);
+  
+  if (eventIndex === -1) {
+    throw new Error("Мероприятие не найдено");
+  }
+  
+  // Обновляем мероприятие, сохраняя неизменяемые поля
+  const updatedEvent: Event = {
+    ...events[eventIndex],
+    ...eventData,
+  };
+  
+  events[eventIndex] = updatedEvent;
+  
+  return updatedEvent;
+};
+
+// DELETE: Удаление мероприятия (только для админа)
+export const deleteEvent = async (eventId: string, currentUser: User) => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  if (!currentUser.isAdmin) {
+    throw new Error("Только администраторы могут удалять мероприятия");
+  }
+  
+  const eventIndex = events.findIndex(e => e.id === eventId);
+  
+  if (eventIndex === -1) {
+    throw new Error("Мероприятие не найдено");
+  }
+  
+  // Удаляем мероприятие
+  events = events.filter(e => e.id !== eventId);
+  
+  // Удаляем все связанные статусы пользователей
+  userEventStatus = userEventStatus.filter(s => s.eventId !== eventId);
+  
+  return { success: true };
+};
+
 // PATCH: Изменение статуса посещения мероприятия
 export const updateEventAttendance = async (
   eventId: string, 

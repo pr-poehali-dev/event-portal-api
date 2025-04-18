@@ -5,18 +5,45 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Event, getEventById, toggleEventLike, updateEventAttendance } from "@/api/eventAPI";
+import { 
+  Event, 
+  getEventById, 
+  toggleEventLike, 
+  updateEventAttendance,
+  deleteEvent 
+} from "@/api/eventAPI";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/use-toast";
-import { ArrowLeft, Heart, Calendar, MapPin, Share2, UserCheck, UserX } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Heart, 
+  Calendar, 
+  MapPin, 
+  Share2, 
+  UserCheck, 
+  UserX,
+  Pencil,
+  Trash2
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 const EventDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -123,6 +150,31 @@ const EventDetails = () => {
     }
   };
 
+  const handleDeleteEvent = async () => {
+    if (!event || !isAdmin) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteEvent(event.id, user!);
+      
+      toast({
+        title: "Мероприятие удалено",
+        description: "Мероприятие было успешно удалено",
+      });
+      
+      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить мероприятие",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setConfirmDelete(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -171,12 +223,33 @@ const EventDetails = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 md:px-6 py-8">
-        <Button variant="outline" asChild className="mb-6">
-          <Link to="/events">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Назад к афише
-          </Link>
-        </Button>
+        <div className="flex justify-between items-center mb-6">
+          <Button variant="outline" asChild>
+            <Link to="/events">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Назад к афише
+            </Link>
+          </Button>
+          
+          {isAdmin && (
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline"
+                onClick={() => navigate(`/events/edit/${event.id}`)}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Редактировать
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={() => setConfirmDelete(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Удалить
+              </Button>
+            </div>
+          )}
+        </div>
         
         <h1 className="text-3xl md:text-4xl font-bold mb-6">{event.title}</h1>
         
@@ -290,6 +363,32 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Диалог подтверждения удаления */}
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Подтверждение удаления</DialogTitle>
+            <DialogDescription>
+              Вы уверены, что хотите удалить мероприятие "{event.title}"?
+              <br />
+              Это действие нельзя отменить.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Отмена</Button>
+            </DialogClose>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteEvent}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Удаление..." : "Удалить"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
