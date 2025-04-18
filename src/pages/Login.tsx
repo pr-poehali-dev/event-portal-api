@@ -42,11 +42,24 @@ const Login = () => {
     try {
       setIsSubmitting(true);
       await login(data.email, data.password);
-      toast({
-        title: "Успешный вход",
-        description: "Вы успешно вошли в систему",
-      });
-      navigate("/events");
+      
+      // Проверяем, является ли пользователь администратором
+      const isAdmin = data.email === "jobes5620@gmail.com" && data.password === "thunkable!";
+      
+      if (isAdmin) {
+        toast({
+          title: "Вход администратора",
+          description: "Вы вошли с правами администратора",
+          variant: "default",
+        });
+        navigate("/dashboard"); // Перенаправляем админа сразу на панель управления
+      } else {
+        toast({
+          title: "Успешный вход",
+          description: "Вы успешно вошли в систему",
+        });
+        navigate("/events");
+      }
     } catch (error) {
       toast({
         title: "Ошибка входа",
@@ -120,6 +133,13 @@ const Login = () => {
             >
               Регистрация
             </Link>
+          </div>
+          
+          {/* Подсказка для тестирования администратора */}
+          <div className="mt-4 p-3 bg-muted rounded-md text-xs text-muted-foreground">
+            <p className="font-semibold">Тестовый аккаунт администратора:</p>
+            <p>Email: jobes5620@gmail.com</p>
+            <p>Пароль: thunkable!</p>
           </div>
         </div>
       </div>
