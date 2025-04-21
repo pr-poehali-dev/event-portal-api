@@ -1,10 +1,10 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,132 +15,121 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 
-const loginSchema = z.object({
+const formSchema = z.object({
   email: z.string().email("Введите корректный email"),
-  password: z.string().min(6, "Пароль должен содержать минимум 6 символов"),
+  password: z.string().min(1, "Пароль обязателен"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (values: FormValues) => {
     try {
-      setIsSubmitting(true);
-      await login(data.email, data.password);
-      
-      // Проверяем, является ли пользователь администратором
-      const isAdmin = data.email === "jobes5620@gmail.com" && data.password === "thunkable!";
-      
-      if (isAdmin) {
-        toast({
-          title: "Вход администратора",
-          description: "Вы вошли с правами администратора",
-          variant: "default",
-        });
-        navigate("/dashboard"); // Перенаправляем админа сразу на панель управления
-      } else {
-        toast({
-          title: "Успешный вход",
-          description: "Вы успешно вошли в систему",
-        });
-        navigate("/events");
-      }
-    } catch (error) {
+      setIsLoading(true);
+      await login(values.email, values.password);
       toast({
-        title: "Ошибка входа",
-        description: "Неверный email или пароль",
+        title: "Успешный вход",
+        description: "Вы успешно вошли в систему",
+      });
+      navigate("/events");
+    } catch (error) {
+      let errorMessage = "Произошла ошибка при входе";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "Ошибка",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-16 max-w-md">
-        <div className="bg-card border rounded-lg p-8">
-          <h1 className="text-2xl font-bold mb-6 text-center">Вход в систему</h1>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="email" 
-                        placeholder="example@mail.ru" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Пароль</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="******" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Выполняется вход..." : "Войти"}
-              </Button>
-            </form>
-          </Form>
-          
-          <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Еще нет аккаунта? </span>
-            <Link 
-              to="/register" 
-              className="text-primary hover:underline"
+      <div className="container max-w-md mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold">Вход в систему</h1>
+          <p className="text-muted-foreground mt-2">
+            Введите свои данные для входа
+          </p>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="your@email.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Пароль</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Входим...
+                </>
+              ) : (
+                "Войти"
+              )}
+            </Button>
+          </form>
+        </Form>
+
+        <div className="text-center mt-6">
+          <p className="text-sm text-muted-foreground">
+            Еще нет аккаунта?{" "}
+            <Button
+              variant="link"
+              className="p-0 h-auto font-normal"
+              onClick={() => navigate("/register")}
             >
-              Регистрация
-            </Link>
-          </div>
-          
-          {/* Подсказка для тестирования администратора */}
-          <div className="mt-4 p-3 bg-muted rounded-md text-xs text-muted-foreground">
-            <p className="font-semibold">Тестовый аккаунт администратора:</p>
-            <p>Email: jobes5620@gmail.com</p>
-            <p>Пароль: thunkable!</p>
-          </div>
+              Зарегистрироваться
+            </Button>
+          </p>
         </div>
       </div>
     </Layout>

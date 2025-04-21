@@ -1,355 +1,306 @@
 
-import { User } from "../context/AuthContext";
+import { User } from "@/context/AuthContext";
 
 export interface Event {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
-  date: Date;
-  city: "Копейск" | "Челябинск";
+  date: string;
+  city: string;
   category: string;
+  imageUrl: string;
+  price: string;
   likes: number;
   attendingCount: number;
-  createdBy: string;
-  userStatus?: "attending" | "notAttending" | null;
   userLiked?: boolean;
+  userStatus?: "attending" | "notAttending" | null;
 }
 
-// Моковые данные для разработки
-const mockEvents: Event[] = [
+// Примеры мероприятий с актуальными датами и изображениями
+const initialEvents: Event[] = [
   {
     id: "1",
-    title: "Фестиваль классической музыки",
-    description: "Насладитесь шедеврами классической музыки в исполнении Челябинского симфонического оркестра под руководством приглашенного дирижера",
-    imageUrl: "/placeholder.svg",
-    date: new Date(2024, 6, 22, 19, 0), // 22 июля 2024, 19:00
-    city: "Челябинск",
-    category: "Концерты",
-    likes: 42,
-    attendingCount: 18,
-    createdBy: "admin"
+    title: "Фестиваль классической музыки «Белые ночи»",
+    description: "Погрузитесь в атмосферу классической музыки на набережной Невы. В программе: произведения Чайковского, Рахманинова, Мусоргского в исполнении симфонического оркестра.",
+    date: "2024-07-25T19:00:00",
+    city: "Санкт-Петербург",
+    category: "Концерт",
+    imageUrl: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=1470&auto=format&fit=crop",
+    price: "от 1500 ₽",
+    likes: 124,
+    attendingCount: 87
   },
   {
     id: "2",
-    title: "Современное искусство Урала",
-    description: "Уникальная выставка работ современных уральских художников. Представлены живопись, графика и скульптура. Вход свободный.",
-    imageUrl: "/placeholder.svg",
-    date: new Date(2024, 7, 15, 12, 0), // 15 августа 2024, 12:00
-    city: "Копейск",
-    category: "Выставки",
-    likes: 28,
-    attendingCount: 15,
-    createdBy: "admin"
+    title: "Выставка «Современное искусство: взгляд в будущее»",
+    description: "Уникальная экспозиция работ молодых художников, представляющих новое течение в современном искусстве. Интерактивные инсталляции и мультимедийные проекты.",
+    date: "2024-08-10T10:00:00",
+    city: "Москва",
+    category: "Выставка",
+    imageUrl: "https://images.unsplash.com/photo-1594077053809-da29647a43d8?q=80&w=1374&auto=format&fit=crop",
+    price: "от 800 ₽",
+    likes: 89,
+    attendingCount: 55
   },
   {
     id: "3",
-    title: "Большой гастрономический фестиваль",
-    description: "Лучшие рестораны и шеф-повара Челябинска представят свои фирменные блюда на центральной площади. Дегустации, мастер-классы и развлекательная программа.",
-    imageUrl: "/placeholder.svg",
-    date: new Date(2024, 8, 8, 10, 0), // 8 сентября 2024, 10:00
-    city: "Челябинск",
-    category: "Фестивали",
-    likes: 85,
-    attendingCount: 120,
-    createdBy: "admin"
+    title: "Гастрономический фестиваль «Вкусы России»",
+    description: "Фестиваль национальной кухни с участием лучших шеф-поваров страны. Дегустации, мастер-классы, кулинарные шоу и конкурсы для всей семьи.",
+    date: "2024-09-15T12:00:00",
+    city: "Казань",
+    category: "Фестиваль",
+    imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1374&auto=format&fit=crop",
+    price: "Бесплатно",
+    likes: 152,
+    attendingCount: 103
+  },
+  {
+    id: "4",
+    title: "Международный кинофестиваль короткометражных фильмов",
+    description: "Показы лучших короткометражных фильмов из разных стран мира. Встречи с режиссерами, дискуссии и мастер-классы от профессионалов киноиндустрии.",
+    date: "2024-08-25T18:30:00",
+    city: "Москва",
+    category: "Кино",
+    imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1459&auto=format&fit=crop",
+    price: "от 600 ₽",
+    likes: 75,
+    attendingCount: 42
+  },
+  {
+    id: "5",
+    title: "Фестиваль электронной музыки «Digital Waves»",
+    description: "Масштабное музыкальное событие с участием известных диджеев и продюсеров. Несколько сцен, световое шоу и интерактивные зоны для отдыха.",
+    date: "2024-07-30T20:00:00",
+    city: "Сочи",
+    category: "Фестиваль",
+    imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1470&auto=format&fit=crop",
+    price: "от 2500 ₽",
+    likes: 198,
+    attendingCount: 145
+  },
+  {
+    id: "6",
+    title: "Театральный фестиваль «Золотая маска»",
+    description: "Показы лучших театральных постановок года. В программе: драма, комедия, опера, балет, современный танец и уникальные экспериментальные спектакли.",
+    date: "2024-09-05T19:00:00",
+    city: "Москва",
+    category: "Театр",
+    imageUrl: "https://images.unsplash.com/photo-1503095396549-807759245b35?q=80&w=1471&auto=format&fit=crop",
+    price: "от 1800 ₽",
+    likes: 112,
+    attendingCount: 76
   }
 ];
 
-let events = [...mockEvents];
-
-// Для хранения состояния в памяти (для моков)
-interface UserEventStatus {
-  userId: string;
-  eventId: string;
-  status: "attending" | "notAttending" | null;
+// Имитация хранилища данных
+let events = [...initialEvents];
+const userEventInteractions: Record<string, Record<string, {
   liked: boolean;
-}
+  status: "attending" | "notAttending" | null;
+}>> = {};
 
-let userEventStatus: UserEventStatus[] = [];
+// Получение списка мероприятий с применением фильтров
+export const getEvents = async (
+  filters: {
+    city?: string;
+    category?: string;
+    fromDate?: Date;
+    toDate?: Date;
+    searchQuery?: string;
+  } = {},
+  currentUser?: User | null
+): Promise<Event[]> => {
+  // Имитация задержки запроса к API
+  await new Promise(resolve => setTimeout(resolve, 500));
 
-// GET: Получение списка мероприятий с фильтрацией
-export const getEvents = async (filters?: {
-  city?: string;
-  category?: string;
-  fromDate?: Date;
-  toDate?: Date;
-  searchQuery?: string;
-}, currentUser?: User | null) => {
-  // Имитация задержки сети
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
   let filteredEvents = [...events];
-  
-  // Применяем фильтры
-  if (filters) {
-    if (filters.city) {
-      filteredEvents = filteredEvents.filter(event => 
-        event.city.toLowerCase() === filters.city?.toLowerCase()
-      );
-    }
-    
-    if (filters.category) {
-      filteredEvents = filteredEvents.filter(event => 
-        event.category.toLowerCase() === filters.category?.toLowerCase()
-      );
-    }
-    
-    if (filters.fromDate) {
-      filteredEvents = filteredEvents.filter(event => 
-        new Date(event.date) >= new Date(filters.fromDate!)
-      );
-    }
-    
-    if (filters.toDate) {
-      filteredEvents = filteredEvents.filter(event => 
-        new Date(event.date) <= new Date(filters.toDate!)
-      );
-    }
-    
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      filteredEvents = filteredEvents.filter(event => 
-        event.title.toLowerCase().includes(query) || 
-        event.description.toLowerCase().includes(query)
-      );
-    }
+
+  // Применение фильтров
+  if (filters.city) {
+    filteredEvents = filteredEvents.filter(event => 
+      event.city.toLowerCase().includes(filters.city!.toLowerCase())
+    );
   }
-  
-  // Если есть пользователь, добавляем его статус для каждого события
+
+  if (filters.category) {
+    filteredEvents = filteredEvents.filter(event => 
+      event.category.toLowerCase().includes(filters.category!.toLowerCase())
+    );
+  }
+
+  if (filters.fromDate) {
+    filteredEvents = filteredEvents.filter(event => 
+      new Date(event.date) >= filters.fromDate!
+    );
+  }
+
+  if (filters.toDate) {
+    filteredEvents = filteredEvents.filter(event => 
+      new Date(event.date) <= filters.toDate!
+    );
+  }
+
+  if (filters.searchQuery) {
+    const query = filters.searchQuery.toLowerCase();
+    filteredEvents = filteredEvents.filter(event => 
+      event.title.toLowerCase().includes(query) || 
+      event.description.toLowerCase().includes(query)
+    );
+  }
+
+  // Добавление информации о взаимодействиях пользователя
   if (currentUser) {
-    filteredEvents = filteredEvents.map(event => {
-      const userStatus = userEventStatus.find(
-        status => status.userId === currentUser.id && status.eventId === event.id
-      );
-      
-      return {
-        ...event,
-        userStatus: userStatus?.status || null,
-        userLiked: userStatus?.liked || false
-      };
-    });
+    return filteredEvents.map(event => ({
+      ...event,
+      userLiked: userEventInteractions[currentUser.id]?.[event.id]?.liked || false,
+      userStatus: userEventInteractions[currentUser.id]?.[event.id]?.status || null
+    }));
   }
-  
+
   return filteredEvents;
 };
 
-// GET: Получение конкретного мероприятия по ID
-export const getEventById = async (id: string, currentUser?: User | null) => {
+// Получение детальной информации о мероприятии
+export const getEventById = async (id: string, currentUser?: User | null): Promise<Event | null> => {
+  // Имитация задержки запроса к API
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   const event = events.find(e => e.id === id);
   
-  if (!event) {
-    throw new Error("Мероприятие не найдено");
-  }
+  if (!event) return null;
   
   if (currentUser) {
-    const userStatus = userEventStatus.find(
-      status => status.userId === currentUser.id && status.eventId === id
-    );
-    
     return {
       ...event,
-      userStatus: userStatus?.status || null,
-      userLiked: userStatus?.liked || false
+      userLiked: userEventInteractions[currentUser.id]?.[event.id]?.liked || false,
+      userStatus: userEventInteractions[currentUser.id]?.[event.id]?.status || null
     };
   }
   
   return event;
 };
 
-// POST: Создание нового мероприятия (только для админа)
-export const createEvent = async (eventData: {
-  title: string;
-  description: string;
-  imageUrl: string;
-  date: Date;
-  city: "Копейск" | "Челябинск";
-  category: string;
-}, currentUser: User) => {
+// Поставить/убрать лайк мероприятию
+export const toggleEventLike = async (eventId: string, user: User): Promise<Event> => {
+  // Имитация задержки запроса к API
   await new Promise(resolve => setTimeout(resolve, 300));
-  
-  if (!currentUser.isAdmin) {
-    throw new Error("Только администраторы могут создавать мероприятия");
-  }
-  
-  const newEvent: Event = {
-    ...eventData,
-    id: String(Date.now()),
-    likes: 0,
-    attendingCount: 0,
-    createdBy: currentUser.id
-  };
-  
-  events = [...events, newEvent];
-  
-  return newEvent;
-};
 
-// PUT: Обновление существующего мероприятия (только для админа)
-export const updateEvent = async (
-  eventId: string,
-  eventData: {
-    title: string;
-    description: string;
-    imageUrl: string;
-    date: Date;
-    city: "Копейск" | "Челябинск";
-    category: string;
-  },
-  currentUser: User
-) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  if (!currentUser.isAdmin) {
-    throw new Error("Только администраторы могут редактировать мероприятия");
+  // Инициализация взаимодействий пользователя, если их еще нет
+  if (!userEventInteractions[user.id]) {
+    userEventInteractions[user.id] = {};
   }
   
+  if (!userEventInteractions[user.id][eventId]) {
+    userEventInteractions[user.id][eventId] = { liked: false, status: null };
+  }
+  
+  const currentLiked = userEventInteractions[user.id][eventId].liked;
+  userEventInteractions[user.id][eventId].liked = !currentLiked;
+  
+  // Обновление счетчика лайков
   const eventIndex = events.findIndex(e => e.id === eventId);
-  
-  if (eventIndex === -1) {
-    throw new Error("Мероприятие не найдено");
+  if (eventIndex !== -1) {
+    events[eventIndex] = {
+      ...events[eventIndex],
+      likes: events[eventIndex].likes + (currentLiked ? -1 : 1)
+    };
+    
+    return {
+      ...events[eventIndex],
+      userLiked: !currentLiked,
+      userStatus: userEventInteractions[user.id][eventId].status
+    };
   }
   
-  // Обновляем мероприятие, сохраняя неизменяемые поля
-  const updatedEvent: Event = {
-    ...events[eventIndex],
-    ...eventData,
-  };
-  
-  events[eventIndex] = updatedEvent;
-  
-  return updatedEvent;
+  throw new Error("Мероприятие не найдено");
 };
 
-// DELETE: Удаление мероприятия (только для админа)
-export const deleteEvent = async (eventId: string, currentUser: User) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  if (!currentUser.isAdmin) {
-    throw new Error("Только администраторы могут удалять мероприятия");
-  }
-  
-  const eventIndex = events.findIndex(e => e.id === eventId);
-  
-  if (eventIndex === -1) {
-    throw new Error("Мероприятие не найдено");
-  }
-  
-  // Удаляем мероприятие
-  events = events.filter(e => e.id !== eventId);
-  
-  // Удаляем все связанные статусы пользователей
-  userEventStatus = userEventStatus.filter(s => s.eventId !== eventId);
-  
-  return { success: true };
-};
-
-// PATCH: Изменение статуса посещения мероприятия
+// Обновить статус посещения мероприятия
 export const updateEventAttendance = async (
   eventId: string, 
   status: "attending" | "notAttending" | null,
-  currentUser: User
-) => {
+  user: User
+): Promise<Event> => {
+  // Имитация задержки запроса к API
   await new Promise(resolve => setTimeout(resolve, 300));
-  
-  if (!currentUser) {
-    throw new Error("Требуется авторизация");
+
+  // Инициализация взаимодействий пользователя, если их еще нет
+  if (!userEventInteractions[user.id]) {
+    userEventInteractions[user.id] = {};
   }
   
-  const event = events.find(e => e.id === eventId);
+  if (!userEventInteractions[user.id][eventId]) {
+    userEventInteractions[user.id][eventId] = { liked: false, status: null };
+  }
   
-  if (!event) {
+  const prevStatus = userEventInteractions[user.id][eventId].status;
+  userEventInteractions[user.id][eventId].status = status;
+  
+  // Обновление счетчика посещений
+  const eventIndex = events.findIndex(e => e.id === eventId);
+  if (eventIndex !== -1) {
+    // Если был "attending" и стал не "attending", уменьшаем счетчик
+    if (prevStatus === "attending" && status !== "attending") {
+      events[eventIndex].attendingCount -= 1;
+    }
+    // Если не был "attending" и стал "attending", увеличиваем счетчик
+    else if (prevStatus !== "attending" && status === "attending") {
+      events[eventIndex].attendingCount += 1;
+    }
+    
+    return {
+      ...events[eventIndex],
+      userLiked: userEventInteractions[user.id][eventId].liked,
+      userStatus: status
+    };
+  }
+  
+  throw new Error("Мероприятие не найдено");
+};
+
+// Создание нового мероприятия (для администраторов)
+export const createEvent = async (eventData: Omit<Event, "id" | "likes" | "attendingCount">): Promise<Event> => {
+  // Имитация задержки запроса к API
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const newEvent: Event = {
+    ...eventData,
+    id: (events.length + 1).toString(),
+    likes: 0,
+    attendingCount: 0
+  };
+  
+  events.unshift(newEvent);
+  return newEvent;
+};
+
+// Обновление существующего мероприятия (для администраторов)
+export const updateEvent = async (eventId: string, eventData: Partial<Event>): Promise<Event> => {
+  // Имитация задержки запроса к API
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const eventIndex = events.findIndex(e => e.id === eventId);
+  if (eventIndex === -1) {
     throw new Error("Мероприятие не найдено");
   }
   
-  const existingStatusIndex = userEventStatus.findIndex(
-    s => s.userId === currentUser.id && s.eventId === eventId
-  );
+  events[eventIndex] = {
+    ...events[eventIndex],
+    ...eventData
+  };
   
-  const oldStatus = existingStatusIndex >= 0 
-    ? userEventStatus[existingStatusIndex].status 
-    : null;
-  
-  // Обновляем счетчик посещений
-  if (oldStatus === "attending" && status !== "attending") {
-    event.attendingCount = Math.max(0, event.attendingCount - 1);
-  } else if (oldStatus !== "attending" && status === "attending") {
-    event.attendingCount += 1;
-  }
-  
-  // Обновляем статус пользователя
-  if (existingStatusIndex >= 0) {
-    userEventStatus[existingStatusIndex].status = status;
-  } else {
-    userEventStatus.push({
-      userId: currentUser.id,
-      eventId,
-      status,
-      liked: false
-    });
-  }
-  
-  return { ...event, userStatus: status };
+  return events[eventIndex];
 };
 
-// PATCH: Лайк/дизлайк мероприятия
-export const toggleEventLike = async (eventId: string, currentUser: User) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  if (!currentUser) {
-    throw new Error("Требуется авторизация");
-  }
-  
-  const event = events.find(e => e.id === eventId);
-  
-  if (!event) {
+// Удаление мероприятия (для администраторов)
+export const deleteEvent = async (eventId: string): Promise<void> => {
+  // Имитация задержки запроса к API
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const eventIndex = events.findIndex(e => e.id === eventId);
+  if (eventIndex === -1) {
     throw new Error("Мероприятие не найдено");
   }
   
-  const existingStatusIndex = userEventStatus.findIndex(
-    s => s.userId === currentUser.id && s.eventId === eventId
-  );
-  
-  let isLiked;
-  
-  if (existingStatusIndex >= 0) {
-    // Меняем состояние лайка на противоположное
-    isLiked = !userEventStatus[existingStatusIndex].liked;
-    userEventStatus[existingStatusIndex].liked = isLiked;
-  } else {
-    // Создаем новую запись с лайком
-    isLiked = true;
-    userEventStatus.push({
-      userId: currentUser.id,
-      eventId,
-      status: null,
-      liked: true
-    });
-  }
-  
-  // Обновляем количество лайков
-  event.likes = isLiked 
-    ? event.likes + 1 
-    : Math.max(0, event.likes - 1);
-  
-  return { ...event, userLiked: isLiked };
-};
-
-// Получение категорий мероприятий
-export const getEventCategories = async () => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  // Для простоты вернем статичный список категорий
-  return [
-    "Концерты",
-    "Выставки",
-    "Фестивали",
-    "Спорт",
-    "Образование",
-    "Театр",
-    "Кино",
-    "Другое"
-  ];
+  events = events.filter(e => e.id !== eventId);
 };
