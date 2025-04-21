@@ -48,9 +48,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Здесь должен быть запрос к API
-      // Пока имитируем для примера
+      // Проверяем учетные данные администратора
       const isAdmin = email === "jobes5620@gmail.com" && password === "thunkable!";
+      
+      // Если это jobes5620@gmail.com, но пароль неверный - отклоняем
+      if (email === "jobes5620@gmail.com" && password !== "thunkable!") {
+        throw new Error("Неверный пароль для администратора");
+      }
       
       const userData: User = {
         id: "1",

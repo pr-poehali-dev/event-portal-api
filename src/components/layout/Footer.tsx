@@ -45,8 +45,8 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Контакты</h3>
             <address className="not-italic text-muted-foreground">
               <p>Челябинск, ул. Примерная, 123</p>
-              <p>Email: info@afishagid.ru</p>
-              <p>Телефон: +7 (351) 123-45-67</p>
+              <p>Email: jobes5620@gmail.com</p>
+              <p>Телефон: 7(951)251-16-49</p>
             </address>
           </div>
         </div>
